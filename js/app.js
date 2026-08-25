@@ -231,21 +231,30 @@ function initWizard() {
           text
         );
 
+        // signRes fields: sig (or signature), nonce, text (or normalized_text)
+        // The DID comes from state.vault
+        const did = state.vault.did;
+        const sig = signRes.sig || signRes.signature;
+        const nonce = signRes.nonce;
+        const normalizedText = signRes.text || signRes.normalized_text || text;
+
         const receipt = await client.postSigned(
           room,
-          signRes.did,
-          signRes.signature,
-          signRes.nonce,
-          signRes.normalized_text
+          did,
+          sig,
+          nonce,
+          normalizedText
         );
 
-        state.wizard.greetingReceipt = { room, ...receipt, text };
+        // Extract sequence from Technocore response (various possible shapes)
+        const seq = receipt && (receipt.seq || (receipt.posted && receipt.posted.seq) || receipt.id || "?");
+        state.wizard.greetingReceipt = { room, ...receipt, posted: { seq }, text };
         state.wizard.step3Done = true;
         localStorage.setItem("flop_wiz_step3", "1");
         localStorage.setItem("flop_wiz_greet_receipt", JSON.stringify(state.wizard.greetingReceipt));
 
         renderWizardState();
-        showToast("✓ Step 3 Complete: Greeting Posted to Technocore!", "success");
+        showToast(`✓ Step 3 Complete: Greeting Posted! (seq #${seq})`, "success");
       } catch (err) {
         showToast("Greeting error: " + err.message, "error");
       } finally {
@@ -303,6 +312,7 @@ function initWizard() {
             room: "technocore",
             pem: state.vault.pem,
             passphrase: state.vault.passphrase,
+            did: state.vault.did,
             client,
           });
         } else {
@@ -323,6 +333,7 @@ function initWizard() {
             room: "technocore",
             pem: state.vault.pem,
             passphrase: state.vault.passphrase,
+            did: state.vault.did,
             client,
           });
         }
@@ -488,7 +499,7 @@ function renderWizardState() {
     }
     if (step3Result) {
       const rec = state.wizard.greetingReceipt;
-      const seq = rec.posted && rec.posted.seq ? rec.posted.seq : (rec.seq || "?");
+      const seq = (rec.posted && rec.posted.seq) || rec.seq || rec.id || "?";
       step3Result.style.display = "block";
       step3Result.innerHTML = `
         <div class="notice-box success" style="margin-top:6px">

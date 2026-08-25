@@ -9,26 +9,29 @@ export const FlopProof = {
   /**
    * Build Path A (Public Content) Proof
    */
-  async createPathAProof({ url, topic, room = "technocore", pem, passphrase, client }) {
+  async createPathAProof({ url, topic, room = "technocore", pem, passphrase, did, client }) {
     if (!url || !topic) {
       throw new Error("Contribution URL and topic description are required");
     }
 
     const messageText = `I published a Technocore contribution: ${url}. It helps people understand ${topic}.`;
     
-    // Sign message
+    // Sign message — works via local server or browser WebCrypto
     const signResult = await FlopCrypto.signMessage(pem, passphrase, room, messageText);
-    const { did, nonce, signature, normalized_text, payload } = signResult;
+    const sig = signResult.sig || signResult.signature;
+    const nonce = signResult.nonce;
+    const normalizedText = signResult.text || signResult.normalized_text || messageText;
+    const resolvedDid = did || signResult.did;
 
     const proof = {
       version: "1.0",
       type: "Path A - Public Contribution",
-      did,
+      did: resolvedDid,
       room,
       nonce,
-      message: normalized_text,
-      signature,
-      payload,
+      message: normalizedText,
+      signature: sig,
+      payload: signResult.payload_string || signResult.payload,
       contribution_url: url,
       topic,
       created_at: new Date().toISOString(),
@@ -37,7 +40,7 @@ export const FlopProof = {
     // If client provided, post to Technocore
     let postedReceipt = null;
     if (client) {
-      postedReceipt = await client.postSigned(room, did, signature, nonce, normalized_text);
+      postedReceipt = await client.postSigned(room, resolvedDid, sig, nonce, normalizedText);
       proof.receipt = postedReceipt;
     }
 
@@ -47,7 +50,7 @@ export const FlopProof = {
   /**
    * Build Path B (Git Open Source) Proof
    */
-  async createPathBProof({ repoUrl, commitHash, description, room = "technocore", pem, passphrase, client }) {
+  async createPathBProof({ repoUrl, commitHash, description, room = "technocore", pem, passphrase, did, client }) {
     if (!repoUrl || !commitHash) {
       throw new Error("Repository URL and Commit Hash are required");
     }
@@ -58,17 +61,20 @@ export const FlopProof = {
     const messageText = `I published an open-source contribution for Technocore at ${repoUrl} (commit ${commitHash}): ${description || "Flop Second verification"}`;
 
     const signResult = await FlopCrypto.signMessage(pem, passphrase, room, messageText);
-    const { did, nonce, signature, normalized_text, payload } = signResult;
+    const sig = signResult.sig || signResult.signature;
+    const nonce = signResult.nonce;
+    const normalizedText = signResult.text || signResult.normalized_text || messageText;
+    const resolvedDid = did || signResult.did;
 
     const proof = {
       version: "1.0",
       type: "Path B - Git Proof",
-      did,
+      did: resolvedDid,
       room,
       nonce,
-      message: normalized_text,
-      signature,
-      payload,
+      message: normalizedText,
+      signature: sig,
+      payload: signResult.payload_string || signResult.payload,
       repo_url: repoUrl,
       commit: commitHash,
       description,
@@ -77,7 +83,7 @@ export const FlopProof = {
 
     let postedReceipt = null;
     if (client) {
-      postedReceipt = await client.postSigned(room, did, signature, nonce, normalized_text);
+      postedReceipt = await client.postSigned(room, resolvedDid, sig, nonce, normalizedText);
       proof.receipt = postedReceipt;
     }
 
