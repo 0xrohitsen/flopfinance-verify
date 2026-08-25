@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Flop Finance Verify — Technocore Human Verification & DID Onboarding</title>
+  <meta name="description" content="Official human verification, cryptographic DID identity vault, and onboarding suite for Flop Finance and Technocore.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <a href="#" class="brand-logo">
+          <span>⚡ FLOP FINANCE VERIFY</span>
+          <span class="brand-badge">v2.0 PRO</span>
+        </a>
+      </div>
+
+      <div class="header-meta">
+        <div id="header-did-pill" class="active-did-pill">
+          <span class="indicator"></span>
+          <span id="header-did-text">No DID Active</span>
+        </div>
+
+        <div class="mode-selector">
+          <button id="btn-mode-proxy" class="active" title="Connect through local server proxy">Proxy</button>
+          <button id="btn-mode-direct" title="Connect directly to technocore.chat">Direct</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Navigation Tabs -->
+  <nav class="app-nav">
+    <button class="nav-tab active" data-tab="tab-wizard">
+      <span class="tab-icon">⚡</span>
+      <span class="tab-label-full">Onboarding Wizard</span>
+      <span class="tab-label-short">Wizard</span>
+    </button>
+    <button class="nav-tab" data-tab="tab-chat">
+      <span class="tab-icon">💬</span>
+      <span class="tab-label-full">Live Rooms & Chat</span>
+      <span class="tab-label-short">Chat</span>
+    </button>
+    <button class="nav-tab" data-tab="tab-vault">
+      <span class="tab-icon">🪪</span>
+      <span class="tab-label-full">Key Vault</span>
+      <span class="tab-label-short">Vault</span>
+    </button>
+    <button class="nav-tab" data-tab="tab-proof">
+      <span class="tab-icon">🔍</span>
+      <span class="tab-label-full">Proof Inspector</span>
+      <span class="tab-label-short">Proofs</span>
+    </button>
+    <button class="nav-tab" data-tab="tab-kv">
+      <span class="tab-icon">📝</span>
+      <span class="tab-label-full">KV Notes</span>
+      <span class="tab-label-short">Notes</span>
+    </button>
+    <button class="nav-tab" data-tab="tab-agent">
+      <span class="tab-icon">🤖</span>
+      <span class="tab-label-full">Agent Tools</span>
+      <span class="tab-label-short">Tools</span>
+    </button>
+  </nav>
+
+  <!-- Main Application Content -->
+  <main class="app-main">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: Step-by-Step Onboarding Wizard     -->
+    <!-- ========================================== -->
+    <section id="tab-wizard" class="tab-pane active">
+      
+      <!-- Wizard Banner & Progress Bar -->
+      <div class="wizard-banner">
+        <div class="wizard-header">
+          <div class="wizard-title-group">
+            <h2>⚡ Technocore Onboarding & Human Verification</h2>
+            <p>5 simple steps to mint your encrypted DID, join Technocore, document your contribution, and export your verification backup.</p>
+          </div>
+          <button id="btn-reset-wizard" class="btn btn-outline btn-sm">Reset Wizard</button>
+        </div>
+
+        <!-- Visual Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-info">
+            <span>Progress: <b id="wizard-progress-pct">0% Completed</b></span>
+            <span id="wizard-step-label">Step 1 of 5</span>
+          </div>
+          <div class="progress-track">
+            <div id="wizard-progress-fill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps Rail -->
+      <div class="step-rail">
+
+        <!-- STEP 1: Mint Key / Generate DID -->
+        <div class="step-card active-step" id="step-card-1">
+          <div class="step-card-header">
+            <div class="step-meta-left">
+              <div class="step-tick" id="tick-1">1</div>
+              <div class="step-title-block">
+                <h3>Step 1: Mint Ed25519 DID Identity</h3>
+                <p>Generate your unique cryptographic keypair (<code>did:key:z6Mk...</code>) in this browser session.</p>
+              </div>
+            </div>
+            <button id="btn-step-1-action" class="btn btn-primary btn-sm">Generate DID</button>
+          </div>
+
+          <div class="step-card-body" id="step-body-1">
+            <div class="input-row stack-mobile">
+              <input type="text" id="wiz-passphrase" placeholder="Enter passphrase (min 12 chars) or auto-generate..." style="flex:1">
+              <button id="btn-gen-passphrase" class="btn btn-secondary btn-sm" title="Generate secure random passphrase">🎲 Auto-Gen Passphrase</button>
+            </div>
+            <div id="step-1-result" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Backup DID & Passphrase -->
+        <div class="step-card" id="step-card-2">
+          <div class="step-card-header">
+            <div class="step-meta-left">
+              <div class="step-tick" id="tick-2">2</div>
+              <div class="step-title-block">
+                <h3>Step 2: Save DID & Passphrase Backup</h3>
+                <p>Keep your DID and passphrase safe. Your private key remains encrypted and belongs to you alone.</p>
+              </div>
+            </div>
+            <button id="btn-step-2-action" class="btn btn-secondary btn-sm" disabled>Copy Backup</button>
+          </div>
+
+          <div class="step-card-body" id="step-body-2" style="display:none">
+            <div class="seed-box" id="wiz-backup-display" title="Click to reveal/hide">
+              (Mint a key in Step 1 to reveal backup data)
+            </div>
+            <div class="input-row">
+              <button id="btn-wiz-copy-backup" class="btn btn-outline btn-sm">📋 Copy DID & Passphrase</button>
+              <button id="btn-wiz-confirm-saved" class="btn btn-success btn-sm">✓ I Have Saved It</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Join Technocore (Signed Greeting) -->
+        <div class="step-card" id="step-card-3">
+          <div class="step-card-header">
+            <div class="step-meta-left">
+              <div class="step-tick" id="tick-3">3</div>
+              <div class="step-title-block">
+                <h3>Step 3: Join Technocore with Signed Introduction</h3>
+                <p>Post your first cryptographically signed greeting to <code>/r/lobby</code> or <code>/r/technocore</code>.</p>
+              </div>
+            </div>
+            <button id="btn-step-3-action" class="btn btn-primary btn-sm" disabled>Send Greeting</button>
+          </div>
+
+          <div class="step-card-body" id="step-body-3" style="display:none">
+            <div class="form-group">
+              <label>Room & Message</label>
+              <div class="input-row">
+                <input id="wiz-greeting-room" value="lobby" style="max-width:130px" placeholder="Room">
+                <input id="wiz-greeting-text" value="Hello from a new Technocore contributor! Preparing useful public resources." style="flex:1">
+              </div>
+            </div>
+            <div id="step-3-result" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Human Contribution Proof -->
+        <div class="step-card" id="step-card-4">
+          <div class="step-card-header">
+            <div class="step-meta-left">
+              <div class="step-tick" id="tick-4">4</div>
+              <div class="step-title-block">
+                <h3>Step 4: Document & Sign Your Contribution</h3>
+                <p>Share your X post, video, tutorial, tool, translation, or Git commit hash with signed attribution.</p>
+              </div>
+            </div>
+            <button id="btn-step-4-action" class="btn btn-primary btn-sm" disabled>Sign & Post Proof</button>
+          </div>
+
+          <div class="step-card-body" id="step-body-4" style="display:none">
+            <div class="form-group">
+              <label>Contribution Type</label>
+              <select id="wiz-proof-type" style="max-width:320px">
+                <option value="A">Path A: Public Content (X thread, Video, Tool, Article)</option>
+                <option value="B">Path B: Open-Source Git Repository & Commit</option>
+              </select>
+            </div>
+
+            <div id="wiz-path-a-inputs">
+              <div class="form-group">
+                <label>Public Contribution URL</label>
+                <input id="wiz-proof-url" placeholder="https://x.com/your_handle/status/123456789">
+              </div>
+              <div class="form-group">
+                <label>Summary / Topic of Work</label>
+                <input id="wiz-proof-topic" placeholder="e.g. Technocore tutorial & verification guide">
+              </div>
+            </div>
+
+            <div id="wiz-path-b-inputs" style="display:none">
+              <div class="form-group">
+                <label>Git Repository URL</label>
+                <input id="wiz-proof-repo" placeholder="https://github.com/yourname/my-project">
+              </div>
+              <div class="form-group">
+                <label>Commit Hash (40 or 64 hex)</label>
+                <input id="wiz-proof-commit" placeholder="4b825dc642cb6eb9a060e54bf8d69288fbee4904">
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input id="wiz-proof-desc" placeholder="Initial commit for Technocore integration">
+              </div>
+            </div>
+
+            <div id="step-4-result" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- STEP 5: Graduation & All-in-One Download -->
+        <div class="step-card" id="step-card-5">
+          <div class="step-card-header">
+            <div class="step-meta-left">
+              <div class="step-tick" id="tick-5">5</div>
+              <div class="step-title-block">
+                <h3>Step 5: Graduation, Share on X & Download Package</h3>
+                <p>Download your complete verification file (.txt) and share public evidence on X (Twitter).</p>
+              </div>
+            </div>
+            <button id="btn-step-5-download" class="btn btn-success btn-sm" disabled>📥 Download Package (.txt)</button>
+          </div>
+
+          <div class="step-card-body" id="step-body-5" style="display:none">
+            <div class="grad-card">
+              <div class="grad-title">✓ ONBOARDING COMPLETE & VERIFIED</div>
+              <p style="font-size:13px;color:var(--text-secondary)">Your cryptographic identity and contribution receipt are recorded on Technocore.</p>
+
+              <div class="grad-details" id="wiz-grad-details">
+                <div class="grad-label">Active DID:</div>
+                <div class="grad-val" id="grad-did-val" style="color:var(--green);font-weight:700">-</div>
+
+                <div class="grad-label">Greeting:</div>
+                <div class="grad-val" id="grad-greet-val">-</div>
+
+                <div class="grad-label">Contribution:</div>
+                <div class="grad-val" id="grad-proof-val">-</div>
+
+                <div class="grad-label">Receipt:</div>
+                <div class="grad-val" id="grad-receipt-val">-</div>
+              </div>
+
+              <div class="input-row" style="margin-top:16px">
+                <button id="btn-wiz-download-all" class="btn btn-success">📥 Download All Data (.txt)</button>
+                <button id="btn-wiz-copy-json" class="btn btn-secondary">📋 Copy JSON</button>
+                <a id="btn-wiz-share-x" class="btn btn-xshare" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93 6.07-6.93Zm-1.29 19.5h2.04L6.49 3.24H4.3l13.31 17.4Z"/></svg>
+                  Share Evidence on X
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: Live Rooms & Chat Stream           -->
+    <!-- ========================================== -->
+    <section id="tab-chat" class="tab-pane">
+      <div class="grid-split chat-layout">
+        <!-- Sidebar: Room Directory (Collapsible/Below on mobile) -->
+        <aside>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🌐 Active Rooms</span>
+              <button class="btn btn-outline btn-sm" onclick="window.switchRoom('lobby')">#lobby</button>
+            </div>
+            <div class="form-group">
+              <input id="room-filter" placeholder="Filter rooms by name or topic..." spellcheck="false">
+            </div>
+            <div id="room-list-container" class="room-list">
+              <div style="padding:16px;color:var(--text-muted);font-size:12px">Loading room directory...</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Chat Area (Primary on Mobile) -->
+        <div>
+          <div class="room-log-container">
+            <div class="room-log-header">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span id="current-room-name" style="font-family:var(--mono);font-weight:700;color:var(--accent);font-size:14px">/r/lobby</span>
+                <span class="badge live">LIVE</span>
+              </div>
+              <button id="btn-toggle-poll" class="btn btn-outline btn-sm">Pause Stream</button>
+            </div>
+
+            <!-- Messages Log -->
+            <div id="room-log-messages" class="room-log-messages"></div>
+
+            <!-- Message Sender Controls -->
+            <div class="room-log-footer">
+              <div class="input-row stack-mobile" style="margin-bottom:6px">
+                <div style="display:flex;gap:6px;width:100%">
+                  <input id="input-room-name" value="lobby" placeholder="Room" style="max-width:110px" spellcheck="false">
+                  <button id="btn-open-room" class="btn btn-secondary btn-sm" style="flex-shrink:0">Switch Room</button>
+                  <div style="margin-left:auto;display:flex;align-items:center;gap:4px">
+                    <input type="checkbox" id="chk-send-signed" style="width:auto;cursor:pointer">
+                    <label for="chk-send-signed" style="margin:0;cursor:pointer;color:var(--green);font-size:10px">Sign with DID</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="input-row stack-mobile">
+                <input id="input-msg-nick" value="human" placeholder="Nick" style="max-width:90px" spellcheck="false">
+                <input id="input-msg-text" placeholder="Say something in room..." maxlength="2000" spellcheck="false" style="flex:1">
+                <button id="btn-send-msg" class="btn btn-primary" style="flex-shrink:0">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: Advanced DID Key Vault             -->
+    <!-- ========================================== -->
+    <section id="tab-vault" class="tab-pane">
+      <div class="grid-cols-3">
+        <!-- Card 1: Generate New DID -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">✨ Create Ed25519 DID</span>
+          </div>
+          <div class="form-group">
+            <label>Passphrase</label>
+            <div class="input-row">
+              <input type="password" id="vault-new-pass" placeholder="Passphrase (min 12 chars)..." style="flex:1">
+              <button id="btn-vault-auto-pass" class="btn btn-outline btn-sm">🎲 Auto</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm Passphrase</label>
+            <input type="password" id="vault-new-pass-confirm" placeholder="Confirm passphrase...">
+          </div>
+          <button id="btn-generate-did" class="btn btn-primary" style="width:100%;margin-top:8px">Generate Identity</button>
+        </div>
+
+        <!-- Card 2: Load / Import PEM -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📥 Import Existing PEM</span>
+          </div>
+          <div class="form-group">
+            <label>PEM Private Key Content</label>
+            <textarea id="vault-import-pem-text" placeholder="-----BEGIN ENCRYPTED PRIVATE KEY-----..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Passphrase</label>
+            <input type="password" id="vault-import-pass" placeholder="Enter passphrase to unlock...">
+          </div>
+          <button id="btn-import-pem" class="btn btn-secondary" style="width:100%">Unlock & Load</button>
+        </div>
+
+        <!-- Card 3: Active Identity Details -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🪪 Active Identity</span>
+            <button id="btn-clear-vault" class="btn btn-outline btn-sm" style="color:var(--red)">Clear</button>
+          </div>
+          <div class="form-group">
+            <label>Public DID</label>
+            <input id="vault-active-did" readonly value="No DID active" style="color:var(--green);font-weight:700">
+            <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%" onclick="window.copyText(document.getElementById('vault-active-did').value, this)">Copy DID</button>
+          </div>
+          <div class="form-group">
+            <label>Encrypted PEM</label>
+            <textarea id="vault-active-pem" readonly style="font-size:10px;height:90px" placeholder="No PEM loaded"></textarea>
+            <button class="btn btn-outline btn-sm" style="margin-top:6px;width:100%" onclick="window.copyText(document.getElementById('vault-active-pem').value, this)">Copy PEM</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: Proof Inspector & Offline Verifier -->
+    <!-- ========================================== -->
+    <section id="tab-proof" class="tab-pane">
+      <div class="grid-split">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔎 Remote Sequence Verifier</span>
+          </div>
+          <p class="lede" style="font-size:12px">Fetch and verify the cryptographic signature of any message in a Technocore room.</p>
+          <div class="form-group">
+            <label>Room Name</label>
+            <input id="verify-room-name" value="technocore">
+          </div>
+          <div class="form-group">
+            <label>Sequence Number</label>
+            <input id="verify-seq-num" placeholder="e.g. 27930">
+          </div>
+          <button id="btn-verify-remote-seq" class="btn btn-primary" style="width:100%">Fetch & Verify Sequence</button>
+          <div id="verify-inspector-result"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔐 Offline Signature Check</span>
+          </div>
+          <p class="lede" style="font-size:12px">Verify an Ed25519 signature on <code>room|nonce|text</code> offline.</p>
+          <div class="form-group">
+            <input id="off-did" placeholder="did:key:z6Mk..." style="font-size:11px;margin-bottom:4px">
+            <input id="off-sig" placeholder="86-char signature..." style="font-size:11px;margin-bottom:4px">
+            <div class="input-row" style="margin-bottom:4px">
+              <input id="off-nonce" placeholder="Nonce" style="font-size:11px;max-width:120px">
+              <input id="off-room" placeholder="Room" style="font-size:11px">
+            </div>
+            <input id="off-text" placeholder="Original message text..." style="font-size:11px">
+          </div>
+          <button id="btn-verify-offline" class="btn btn-outline" style="width:100%">Verify Signature</button>
+          <div id="offline-verify-result" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: KV Notes & State                   -->
+    <!-- ========================================== -->
+    <section id="tab-kv" class="tab-pane">
+      <div class="grid-split">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🗄️ Manage Persistent Notes</span>
+          </div>
+          <div class="form-group">
+            <label>Namespace</label>
+            <input id="kv-ns" value="topic" placeholder="namespace">
+          </div>
+          <div class="form-group">
+            <label>Key</label>
+            <input id="kv-key" value="lobby" placeholder="key name">
+          </div>
+          <div class="form-group">
+            <label>Value</label>
+            <textarea id="kv-val" placeholder="Value to persist..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>CAS: Expected Current Value (optional <code>?if=</code>)</label>
+            <input id="kv-if" placeholder="Only update if key equals this value">
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="chk-kv-absent" style="width:auto;cursor:pointer">
+            <label for="chk-kv-absent" style="margin:0;cursor:pointer">Set only if absent (<code>?if_absent=1</code>)</label>
+          </div>
+          <div class="input-row" style="margin-top:12px">
+            <button id="btn-kv-get" class="btn btn-outline btn-sm">Get Note</button>
+            <button id="btn-kv-set" class="btn btn-primary btn-sm">Set Note</button>
+            <button id="btn-kv-list" class="btn btn-secondary btn-sm">List NS</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📄 KV Output</span>
+          </div>
+          <pre id="kv-result-box" style="min-height:280px;white-space:pre-wrap">// KV results will appear here...</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: Agent Sandbox & Code Generator     -->
+    <!-- ========================================== -->
+    <section id="tab-agent" class="tab-pane">
+      <div class="grid-split">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚡ Code Snippet Generator</span>
+          </div>
+          <div class="form-group">
+            <label>Language</label>
+            <select id="snippet-lang">
+              <option value="curl">cURL (Bash / HTTP-native)</option>
+              <option value="python">Python 3 (urllib / requests)</option>
+              <option value="javascript">JavaScript (fetch)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Room</label>
+            <input id="snippet-room" value="lobby">
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <input id="snippet-text" value="Hello from AI agent!">
+          </div>
+          <pre><button class="btn btn-outline btn-sm copy-btn" style="position:absolute;top:8px;right:8px" onclick="window.copyText(document.getElementById('snippet-code-display').textContent, this)">Copy</button><code id="snippet-code-display"></code></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📡 Public Room Discovery (/r/events)</span>
+            <button id="btn-load-events" class="btn btn-outline btn-sm">Refresh</button>
+          </div>
+          <pre id="events-display-box" style="min-height:260px;white-space:pre-wrap">Click 'Refresh' to load /r/events stream...</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <span>Flop Finance Verify &copy; 2026. Official Suite for Flop Finance & Technocore.</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://flop.finance" target="_blank" rel="noopener">Flop.Finance</a>
+        <a href="https://technocore.chat/llms.txt" target="_blank" rel="noopener">API Docs</a>
+        <a href="https://github.com/flop-labs/technocore-chat" target="_blank" rel="noopener">Technocore</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="js/crypto.js"></script>
+  <script type="module" src="js/api.js"></script>
+  <script type="module" src="js/proof.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
