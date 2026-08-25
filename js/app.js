@@ -1,5 +1,7 @@
 /**
- * Flop Second — Application UI Controller, Wizard Orchestrator & Studio.
+ * Flop Finance Verify — Application UI Controller, Wizard Orchestrator & Studio.
+ * Official Client for Flop Finance (https://flop.finance) & Technocore Protocol.
+ * Built by @bigbrainless for @flop_labs.
  */
 
 import { TechnocoreClient } from "./api.js";
@@ -186,8 +188,8 @@ function initWizard() {
   const btnStep2Action = document.getElementById("btn-step-2-action");
 
   const copyBackupText = () => {
-    const text = `FLOP SECOND IDENTITY BACKUP\n` +
-      `============================\n` +
+    const text = `FLOP FINANCE VERIFY IDENTITY BACKUP\n` +
+      `===================================\n` +
       `Public DID:  ${state.vault.did}\n` +
       `Passphrase:  ${state.vault.passphrase}\n\n` +
       `Encrypted PEM:\n${state.vault.pem}\n`;
@@ -551,7 +553,7 @@ function renderWizardState() {
         did: state.vault.did,
         room: p.room || "technocore",
         seq,
-        url: p.contribution_url || p.repo_url || "https://technocore.chat",
+        url: p.contribution_url || p.repo_url || "https://flopfinance-verify.vercel.app",
         topic: p.topic || p.description || "Technocore Verification",
       });
       btnShareX.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;

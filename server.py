@@ -22,6 +22,7 @@ from urllib.request import Request, urlopen
 # Import local CLI crypto routines
 import flop_second_cli as crypto_core
 
+APP_NAME = "Flop Finance Verify"
 APP_VERSION = "2.0.0"
 STATIC_DIR = Path(__file__).parent.resolve()
 DEFAULT_PORT = 8080
@@ -53,7 +54,7 @@ class FlopSecondHandler(SimpleHTTPRequestHandler):
         if path == "/api/status":
             self._send_json({
                 "status": "ok",
-                "app": "Flop Second",
+                "app": APP_NAME,
                 "version": APP_VERSION,
                 "upstream": TECHNOCORE_UPSTREAM,
                 "timestamp": int(time.time()),
