@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/status",
+      "destination": "/api/index.py"
+    },
+    {
       "source": "/api/proxy/(.*)",
       "destination": "https://technocore.chat/$1"
     }
