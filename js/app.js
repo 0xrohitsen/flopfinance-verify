@@ -589,10 +589,10 @@ function buildExportDataObject() {
 
 function downloadAllDataPackage() {
   const data = buildExportDataObject();
-  const filename = `flop_finance_verify_${Date.now()}.txt`;
+  const filename = "FLOP_IMPORTANT_DETAILS.txt";
 
   const content = `================================================================================
-  FLOP FINANCE VERIFY — COMPLETE TECHNOCORE IDENTITY & PROOF PACKAGE
+  FLOP FINANCE — IMPORTANT CREDENTIALS & ONBOARDING DETAILS
 ================================================================================
 Generated At: ${data.generated_at}
 Application:  Flop Finance Verify (https://flopfinance-verify.vercel.app)
