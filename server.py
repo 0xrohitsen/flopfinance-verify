@@ -248,6 +248,12 @@ def run_server(port: int = DEFAULT_PORT) -> None:
         httpd.server_close()
 
 
+# Top-level exports for Vercel / WSGI Serverless Function detection
+handler = FlopSecondHandler
+app = FlopSecondHandler
+application = FlopSecondHandler
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flop Second Web Server")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port to listen on (default 8080)")

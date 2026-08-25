@@ -1,11 +1,14 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/api/proxy/:path*",
       "destination": "https://technocore.chat/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
     }
   ],
   "headers": [
