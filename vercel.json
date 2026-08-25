@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/proxy/:path*",
+      "destination": "https://technocore.chat/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
