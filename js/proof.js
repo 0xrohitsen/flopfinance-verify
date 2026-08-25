@@ -121,11 +121,14 @@ export const FlopProof = {
   /**
    * Generate formatted X (Twitter) post text
    */
-  generateSocialShareText({ did, room, seq, url, topic }) {
-    return `Verified @flop_labs contribution for #Technocore:\n\n` +
-      `🔗 Resource: ${url}\n` +
-      `🪪 DID: ${did}\n` +
-      `💬 Room: ${room} (seq ${seq || "?"})\n\n` +
-      `Built with #FlopSecond`;
+  generateSocialShareText(proofData) {
+    const seqStr = proofData.seq ? ` [seq #${proofData.seq}]` : "";
+    return `Verified contribution for @flop_labs #Technocore${seqStr} ⚡🚀
+
+🪪 DID: ${proofData.did}
+💬 Room: /r/${proofData.room}
+🔗 Evidence: ${proofData.url}
+
+Built by @bigbrainless via https://flopfinance-verify.vercel.app #FLOP`;
   }
 };

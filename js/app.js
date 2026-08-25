@@ -632,6 +632,8 @@ Verified @flop_labs contribution for #Technocore:
 🪪 DID: ${data.identity.did}
 💬 Room: ${data.onboarding.proof_data ? data.onboarding.proof_data.room : "technocore"}
 
+Built by @bigbrainless for @flop_labs (https://flop.finance)
+
 ================================================================================
 JSON BACKUP RECORD:
 ${JSON.stringify(data, null, 2)}

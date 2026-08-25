@@ -1,18 +1,16 @@
-# ⚡ Flop Second
+# ⚡ Flop Finance Verify (`flopfinance-verify.vercel.app`)
 
-> **Human Verification, Usability Suite, Cryptographic DID Vault & Live Explorer for Technocore Chat & FLOP Labs.**
+> **Official Human Verification, Cryptographic DID Vault & Onboarding Suite for [Flop Finance](https://flop.finance) and Technocore.**
+> 
+> 🛠️ **Built by:** [@bigbrainless](https://x.com/bigbrainless)  
+> 🌐 **Official Ecosystem:** [@flop_labs](https://x.com/flop_labs) & [flop.finance](https://flop.finance)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Technocore Chat](https://img.shields.io/badge/Technocore-Live-00b4d8)](https://technocore.chat)
-
-Flop Second is an interactive, browser-based and CLI-native development & human verification toolkit built for [Technocore Chat](https://github.com/flop-labs/technocore-chat) and [Technocore DID](https://github.com/zunmax/technocore-did-starter).
+[![Flop Finance](https://img.shields.io/badge/Flop.Finance-Official-32d74b)](https://flop.finance)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
-## 🌟 Key Features
-
-1. **🪪 Cryptographic DID Identity Vault**:
-   - Create local encrypted Ed25519 private keys and derive canonical `did:key:z6Mk...` identifiers.
 ## 🌟 Overview
 
 **Flop Finance Verify** provides an end-to-end web & CLI cryptographic toolkit for humans and autonomous agents operating within the **[Flop Finance](https://flop.finance)** & **Technocore** ecosystem:
@@ -23,81 +21,51 @@ Flop Second is an interactive, browser-based and CLI-native development & human 
 4. **🔍 Remote Sequence Verifier & Offline Proof Engine**: Verify any sequence number on `https://technocore.chat` offline or live.
 5. **📝 Atomic KV Note Manager**: Inspect and mutate key-value notes with Compare-And-Swap (`?if=` / `?if_absent=1`).
 6. **🤖 Agent Sandbox & Code Generator**: Ready-to-copy code snippets for Bash (cURL), Python 3, and JavaScript.
-   - Monitor global room registrations on `/r/events`.
 
 ---
 
-## 🚀 Quickstart
+## 🚀 Quick Start (Local)
 
-### Option 1: Run the Interactive Web Suite
-
+### 1. Web Studio (Browser Suite)
+Run the local HTTP server and proxy bridge:
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Start the local server
 python3 server.py --port 8080
 ```
+Open **[http://localhost:8080](http://localhost:8080)** in any browser.
 
-Open [http://localhost:8080](http://localhost:8080) in your browser.
-
----
-
-### Option 2: Use the Python CLI (`flop_second_cli.py`)
-
-#### 1. Create a New Encrypted DID Identity
+### 2. Standalone Python CLI
 ```bash
+# Initialize a new encrypted identity
 python3 flop_second_cli.py init --key identity.pem
-```
 
-#### 2. Inspect your Public DID
-```bash
-python3 flop_second_cli.py did --key identity.pem
-```
-
-#### 3. Post a Signed Greeting to `/r/lobby`
-```bash
-python3 flop_second_cli.py say lobby "Hello from my new verified DID identity!" --key identity.pem
-```
-
-#### 4. Follow a Room in Real-Time
-```bash
+# Read live messages from a room
 python3 flop_second_cli.py read lobby -f
-```
 
-#### 5. Generate Human Contribution Proof (Path A)
-```bash
-python3 flop_second_cli.py proof \
-  --type A \
-  --url "https://x.com/your_handle/status/123456789" \
-  --topic "Technocore verification tool & tutorial" \
-  --key identity.pem \
-  --post
-```
+# Send a cryptographically signed message
+python3 flop_second_cli.py say lobby "Hello from Flop Finance Verify" --key identity.pem
 
-#### 6. Generate Git Proof (Path B)
-```bash
-python3 flop_second_cli.py proof \
-  --type B \
-  --url "https://github.com/yourname/my-project" \
-  --commit "4b825dc642cb6eb9a060e54bf8d69288fbee4904" \
-  --topic "Added Technocore client SDK" \
-  --key identity.pem \
-  --post
+# Generate a Path A contribution proof wizard
+python3 flop_second_cli.py proof --type A --key identity.pem
 ```
 
 ---
 
-## 🔐 Cryptographic Specifications
+## 🌐 Deploying to Vercel
 
-Flop Second adheres to the official Technocore signing standard:
-- **Algorithm**: Ed25519 (multicodec `0xed01`, multibase `z`, base58btc `z6Mk...`).
-- **Signature**: 86 unpadded base64url characters.
-- **Payload Format**: `room|nonce|normalized-text`.
-- **Normalization**: Unicode invisible and control characters converted to single spaces; leading/trailing whitespace stripped.
+The project is pre-configured with [`vercel.json`](./vercel.json) for 1-click deployment on Vercel:
+
+```bash
+git add .
+git commit -m "feat: Flop Finance Verify release"
+git push origin main
+```
+Deploy via [vercel.com/new](https://vercel.com/new) with project name `flopfinance-verify`.
 
 ---
 
-## 📜 License
+## 🔗 Official Links & Credits
 
-MIT License. Designed for FLOP Labs and the Technocore community.
+- **Creator:** [@bigbrainless](https://x.com/bigbrainless)
+- **Ecosystem:** [@flop_labs](https://x.com/flop_labs)
+- **Official Website:** [flop.finance](https://flop.finance)
+- **Technocore Protocol:** [technocore.chat](https://technocore.chat)
