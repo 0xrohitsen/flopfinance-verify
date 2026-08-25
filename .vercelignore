@@ -1,0 +1,9 @@
+# Vercel Deployment Ignore
+# Prevents Vercel from deploying local Python tools as broken serverless functions
+server.py
+flop_second_cli.py
+cli.py
+requirements.txt
+__pycache__/
+*.py
+*.pem
