@@ -1,19 +1,5 @@
 {
   "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/proxy/(.*)",
-      "destination": "https://technocore.chat/$1"
-    },
-    {
-      "source": "/api/status",
-      "destination": "/api/status.py"
-    },
-    {
-      "source": "/",
-      "destination": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

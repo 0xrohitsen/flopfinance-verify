@@ -1,7 +1,10 @@
-# Vercel Deployment Ignore
+# Exclude Python backend — this is a pure static frontend on Vercel
 server.py
 flop_second_cli.py
 cli.py
 requirements.txt
+pyproject.toml
+api/
 __pycache__/
 *.pem
+*.py
