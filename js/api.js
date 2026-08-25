@@ -1,20 +1,24 @@
 /**
  * Flop Second Technocore API Client.
- * Handles communications with Technocore Chat via Direct or Local Proxy mode.
+ * Handles communications with Technocore Chat.
+ *
+ * PROXY MODE:  Only active on localhost — routes through local server.py at /api/proxy?path=...
+ * DIRECT MODE: Default on Vercel/production — calls https://technocore.chat directly (CORS is open)
  */
 
 export class TechnocoreClient {
-  constructor(baseUrl = "https://technocore.chat", useProxy = true) {
+  constructor(baseUrl = "https://technocore.chat") {
     this.baseUrl = baseUrl.replace(/\/$/, "");
-    this.useProxy = useProxy;
+    // Default to Direct mode; detectEnvironment may switch to Proxy on localhost
+    this.useProxy = false;
     this.detectEnvironment();
   }
 
   detectEnvironment() {
-    // If opened on localhost / 127.0.0.1, default to proxy mode
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      this.useProxy = true;
-    }
+    const host = window.location.hostname;
+    const isLocal = host === "localhost" || host === "127.0.0.1";
+    // Only use proxy when running locally (routes through server.py)
+    this.useProxy = isLocal;
   }
 
   setMode(useProxy) {
@@ -26,7 +30,9 @@ export class TechnocoreClient {
   }
 
   /**
-   * Build final request URL depending on direct or proxy mode
+   * Build request URL.
+   * - Proxy mode (localhost only): /api/proxy?path=...&param=...
+   * - Direct mode (Vercel/prod):   https://technocore.chat/r/lobby?...
    */
   buildUrl(path, params = {}) {
     const cleanPath = "/" + path.replace(/^\//, "");
@@ -41,6 +47,7 @@ export class TechnocoreClient {
     const queryString = searchParams.toString();
 
     if (this.useProxy) {
+      // Local server.py handles ?path= query param format
       const proxyParams = new URLSearchParams();
       proxyParams.set("path", cleanPath);
       for (const [k, v] of searchParams.entries()) {
@@ -49,6 +56,7 @@ export class TechnocoreClient {
       return `/api/proxy?${proxyParams.toString()}`;
     }
 
+    // Direct call to Technocore (CORS is open on technocore.chat)
     return `${this.baseUrl}${cleanPath}${queryString ? "?" + queryString : ""}`;
   }
 
@@ -91,7 +99,7 @@ export class TechnocoreClient {
     } catch (err) {
       if (err.name === "TypeError" && !this.useProxy) {
         throw new Error(
-          "CORS or network error connecting to Technocore. Switch to 'Proxy Mode' via server.py."
+          "Network error connecting to Technocore. Please check your connection."
         );
       }
       throw err;
@@ -130,13 +138,28 @@ export class TechnocoreClient {
 
   /**
    * Post signed message: GET /r/<room>/say-signed/<did>/<sig>/<nonce>/<text>
+   * Returns the posted room state: { room, count, last_seq, messages: [...] }
    */
   async postSigned(room, did, sig, nonce, text) {
     const encDid = encodeURIComponent(did);
     const encSig = encodeURIComponent(sig);
     const encText = encodeURIComponent(text);
     const path = `/r/${encodeURIComponent(room)}/say-signed/${encDid}/${encSig}/${nonce}/${encText}`;
-    return await this.request(path, { format: "json" });
+    const result = await this.request(path, { format: "json" });
+
+    // Normalize: extract the sequence number from whatever format Technocore returns
+    // Technocore say-signed returns: { room, count, last_seq, first_seq, messages: [...] }
+    if (result && typeof result === "object") {
+      const seq =
+        (typeof result.last_seq === "number" && result.last_seq) ||
+        (Array.isArray(result.messages) && result.messages.length > 0 &&
+          result.messages[result.messages.length - 1].seq) ||
+        result.seq ||
+        null;
+      result._seq = seq; // attach normalized seq
+    }
+
+    return result;
   }
 
   /**
@@ -168,16 +191,11 @@ export class TechnocoreClient {
   /**
    * Fetch event stream
    */
-  async getEvents(since = null) {
-    const params = { format: "json" };
-    if (since !== null) params.since = since;
-    return await this.request("/r/events", params);
-  }
-
-  /**
-   * Health / Stats
-   */
-  async getStats() {
-    return await this.request("/stats");
+  buildStreamUrl(room) {
+    const path = `/r/${encodeURIComponent(room)}/stream`;
+    if (this.useProxy) {
+      return `/api/proxy?path=${encodeURIComponent(path)}`;
+    }
+    return `${this.baseUrl}${path}`;
   }
 }

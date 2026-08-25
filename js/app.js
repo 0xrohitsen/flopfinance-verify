@@ -246,30 +246,19 @@ function initWizard() {
           normalizedText
         );
 
-        // Extract sequence from Technocore response
-        // Technocore say-signed returns a room object: { room, count, last_seq, messages: [...] }
-        // OR the last message in the array, OR a simple { seq } object
-        let seq = "?";
-        if (receipt) {
-          if (typeof receipt.last_seq === "number") {
-            seq = receipt.last_seq;
-          } else if (Array.isArray(receipt.messages) && receipt.messages.length > 0) {
-            seq = receipt.messages[receipt.messages.length - 1].seq;
-          } else if (typeof receipt.seq === "number") {
-            seq = receipt.seq;
-          } else if (receipt.posted && typeof receipt.posted.seq === "number") {
-            seq = receipt.posted.seq;
-          } else if (typeof receipt.id === "number") {
-            seq = receipt.id;
-          }
-        }
-        state.wizard.greetingReceipt = { room, ...receipt, posted: { seq }, text };
+        // Extract sequence — api.js postSigned attaches _seq from last_seq/messages
+        const seq = receipt && (receipt._seq || receipt.last_seq ||
+          (Array.isArray(receipt.messages) && receipt.messages.length > 0 &&
+            receipt.messages[receipt.messages.length - 1].seq) ||
+          receipt.seq || "?");
+
+        state.wizard.greetingReceipt = { room, seq, ...receipt, text };
         state.wizard.step3Done = true;
         localStorage.setItem("flop_wiz_step3", "1");
         localStorage.setItem("flop_wiz_greet_receipt", JSON.stringify(state.wizard.greetingReceipt));
 
         renderWizardState();
-        showToast(`✓ Step 3 Complete: Greeting Posted! (seq #${seq})`, "success");
+        showToast(`✓ Step 3 Complete: Greeting Posted to /r/${room}! (Seq #${seq})`, "success");
       } catch (err) {
         showToast("Greeting error: " + err.message, "error");
       } finally {
@@ -514,7 +503,7 @@ function renderWizardState() {
     }
     if (step3Result) {
       const rec = state.wizard.greetingReceipt;
-      const seq = (rec.posted && rec.posted.seq) || rec.last_seq || (Array.isArray(rec.messages) && rec.messages.length > 0 && rec.messages[rec.messages.length - 1].seq) || rec.seq || rec.id || "?";
+      const seq = rec.seq || rec._seq || rec.last_seq || (Array.isArray(rec.messages) && rec.messages.length > 0 && rec.messages[rec.messages.length - 1].seq) || "?";
       step3Result.style.display = "block";
       step3Result.innerHTML = `
         <div class="notice-box success" style="margin-top:6px">
