@@ -9,16 +9,13 @@
 export class TechnocoreClient {
   constructor(baseUrl = "https://technocore.chat") {
     this.baseUrl = baseUrl.replace(/\/$/, "");
-    // Default to Direct mode; detectEnvironment may switch to Proxy on localhost
-    this.useProxy = false;
-    this.detectEnvironment();
+    // Enable proxy by default so Vercel edge rewrite handles requests without browser CORS errors
+    this.useProxy = true;
   }
 
   detectEnvironment() {
-    const host = window.location.hostname;
-    const isLocal = host === "localhost" || host === "127.0.0.1";
-    // Only use proxy when running locally (routes through server.py)
-    this.useProxy = isLocal;
+    // Keep proxy enabled in all environments (Vercel edge rewrite or local server.py)
+    this.useProxy = true;
   }
 
   setMode(useProxy) {
@@ -31,8 +28,8 @@ export class TechnocoreClient {
 
   /**
    * Build request URL.
-   * - Proxy mode (localhost only): /api/proxy?path=...&param=...
-   * - Direct mode (Vercel/prod):   https://technocore.chat/r/lobby?...
+   * - Proxy mode:  /api/proxy/r/lobby?... (handled by Vercel edge rewrite or server.py, avoids browser CORS)
+   * - Direct mode: https://technocore.chat/r/lobby?...
    */
   buildUrl(path, params = {}) {
     const cleanPath = "/" + path.replace(/^\//, "");
@@ -47,16 +44,10 @@ export class TechnocoreClient {
     const queryString = searchParams.toString();
 
     if (this.useProxy) {
-      // Local server.py handles ?path= query param format
-      const proxyParams = new URLSearchParams();
-      proxyParams.set("path", cleanPath);
-      for (const [k, v] of searchParams.entries()) {
-        proxyParams.set(k, v);
-      }
-      return `/api/proxy?${proxyParams.toString()}`;
+      // Direct path-based proxy matching Vercel rewrite: /api/proxy/:path* -> https://technocore.chat/:path*
+      return `/api/proxy${cleanPath}${queryString ? "?" + queryString : ""}`;
     }
 
-    // Direct call to Technocore (CORS is open on technocore.chat)
     return `${this.baseUrl}${cleanPath}${queryString ? "?" + queryString : ""}`;
   }
 

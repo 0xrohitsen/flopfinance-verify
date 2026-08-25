@@ -61,11 +61,16 @@ class FlopSecondHandler(SimpleHTTPRequestHandler):
             })
             return
 
-        # Proxy to Technocore: /api/proxy?path=/r/lobby&...
-        if path == "/api/proxy":
-            query = parse_qs(parsed.query)
-            target_path = query.get("path", ["/rooms"])[0]
-            other_params = {k: v[0] for k, v in query.items() if k != "path"}
+        # Proxy to Technocore: /api/proxy/r/lobby or /api/proxy?path=/r/lobby
+        if path == "/api/proxy" or path.startswith("/api/proxy/"):
+            if path.startswith("/api/proxy/"):
+                target_path = path[len("/api/proxy"):]
+                query = parse_qs(parsed.query)
+                other_params = {k: v[0] for k, v in query.items()}
+            else:
+                query = parse_qs(parsed.query)
+                target_path = query.get("path", ["/rooms"])[0]
+                other_params = {k: v[0] for k, v in query.items() if k != "path"}
 
             target_url = TECHNOCORE_UPSTREAM.rstrip("/") + "/" + target_path.lstrip("/")
             if other_params:
