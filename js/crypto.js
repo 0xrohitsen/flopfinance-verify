@@ -340,12 +340,12 @@ export const FlopCrypto = {
   },
 
   /**
-   * Sign message with identity (via local server or WebCrypto)
+   * Sign message with identity — pure browser WebCrypto fallback (works on Vercel without server.py)
    */
   async signMessage(pem, passphrase, room, text, nonce = null) {
     const activeNonce = nonce || this.nextNonce();
-    
-    // Try server API first
+
+    // Try server API first (works on localhost)
     try {
       const res = await fetch("/api/crypto/sign", {
         method: "POST",
@@ -356,9 +356,52 @@ export const FlopCrypto = {
         return await res.json();
       }
     } catch (e) {
-      // Fallback
+      // Server not available — fall through to WebCrypto
     }
 
-    throw new Error("Signing requires Flop Second server.py running locally.");
-  }
+    // Pure browser WebCrypto Ed25519 fallback (Vercel / static deployment)
+    if (window.crypto && window.crypto.subtle) {
+      try {
+        const { normText, payloadBytes } = this.messagePayload(room, activeNonce, text);
+
+        // Extract raw PKCS8 bytes from PEM
+        const pemBody = pem
+          .replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g, "")
+          .replace(/\s+/g, "");
+        const pkcs8Bytes = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+
+        // Import PKCS8 as Ed25519 signing key
+        const privateKey = await window.crypto.subtle.importKey(
+          "pkcs8",
+          pkcs8Bytes,
+          { name: "Ed25519" },
+          false,
+          ["sign"]
+        );
+
+        // Sign the payload
+        const sigBuf = await window.crypto.subtle.sign(
+          { name: "Ed25519" },
+          privateKey,
+          payloadBytes
+        );
+
+        const sig = this.base64UrlEncode(new Uint8Array(sigBuf));
+
+        return {
+          sig,
+          nonce: activeNonce,
+          room,
+          text: normText,
+          payload_string: `${room}|${activeNonce}|${normText}`,
+          method: "webcrypto",
+        };
+      } catch (err) {
+        throw new Error("Browser Ed25519 signing failed: " + err.message);
+      }
+    }
+
+    throw new Error("Signing is not supported in this browser. Please use a modern browser.");
+  },
 };
+
